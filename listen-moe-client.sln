@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "listen-moe-client", "listen-moe-client.njsproj", "{A97E0BA6-61A9-4BC1-BA10-274565E705C8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A97E0BA6-61A9-4BC1-BA10-274565E705C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A97E0BA6-61A9-4BC1-BA10-274565E705C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A97E0BA6-61A9-4BC1-BA10-274565E705C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A97E0BA6-61A9-4BC1-BA10-274565E705C8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
