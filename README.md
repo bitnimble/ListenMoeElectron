@@ -1,2 +1,2 @@
 # ListenMoeElectron
-A client for listen.moe, written on Electron
+A client for listen.moe, written on Electron.
