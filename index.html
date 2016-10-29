@@ -121,7 +121,7 @@
         const remote = require('electron').remote;
 
         function getStats() {
-            $.getJSON("http://listen.moe/stats.json", function (data) {
+            $.getJSON("https://listen.moe/api/info", function (data) {
                 $('#label-title').html(data.song_name);
                 $('#label-artist').html(data.artist_name);
 				
