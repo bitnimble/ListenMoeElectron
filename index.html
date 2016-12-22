@@ -120,13 +120,12 @@
     <script>
         const remote = require('electron').remote;
 
-        function getStats() {
-            $.getJSON("https://listen.moe/api/info", function (data) {
-                $('#label-title').html(data.song_name);
-                $('#label-artist').html(data.artist_name);
-				
-            });
-        };
+        const socket = new WebSocket("wss://listen.moe/api/v2/socket");
+        socket.onmessage = function(message) {
+            let data = JSON.parse(message.data);
+            $('#label-title').html(data.song_name);
+            $('#label-artist').html(data.artist_name);
+        }
 
         function mouseWheelHandler(e) {
             let mediaPlayer = $("#audio-player")[0];
@@ -142,12 +141,6 @@
         }
 
         $(document).ready(function (e) {
-            getStats();
-
-            setInterval(function () {
-                getStats();
-            }, 500);
-
             $('#btn-pause-play').on('click', function () {
                 let btn = $($('#btn-pause-play')[0]);
                 let mediaPlayer = $("#audio-player")[0];
