@@ -29,80 +29,57 @@
             height: 16px;
             background-size: 16px 16px;
         }
+	
+		#btn-pause-play-wrapper, #btn-pause-play, #label-title,
+		#label-artist, #right-section, #btn-close,
+		#label-volume-wrapper {
+			position: absolute;
+			-webkit-app-region: no-drag;
+		}
 
         #btn-pause-play-wrapper {
-            position: absolute;
             left: 0;
             top: 0;
             bottom: 0;
             width: 40px;
-
-            /*box-sizing: border-box;
-            border: 1px solid black;*/
         }
 
         #btn-pause-play {
-            position: absolute;
-
             left: 12px;
             top: 16px;
 
             cursor: pointer;
-            -webkit-app-region: no-drag;
         }
 
-        .btn-pause {
-            background-image: url(pause.png);
-        }
+        .btn-pause {background-image: url(pause.png);}
+        .btn-play {background-image: url(play.png);}
 
-        .btn-play {
-            background-image: url(play.png);
-        }
+		h1, h2 {
+			margin: 0;
+			padding: 0;
+			font-weight: lighter;
+		}
 
         /* h1 is used for the song title text */
-        h1 {
-            font-size: 11pt;
-            padding: 0;
-            margin: 0;
-            font-weight: lighter;
-        }
+        h1 {font-size: 11pt;}
 
         /* h2 is used for the artist and volume text */
-        h2 {
-            font-size: 8pt;
-            padding: 0;
-            margin: 0;
-            font-weight: lighter;
-        }
-
-        #label-title {
-            position: absolute;
-            left: 40px;
-            top: 4px;
-
-            -webkit-app-region: no-drag;
-        }
-
-        #label-artist {
-            position: absolute;
-            left: 40px;
-            bottom: 8px;
-            -webkit-app-region: no-drag;
-        }
+        h2 {font-size: 8pt;}
+		
+		#label-title, #label-artist {left: 40px;}
+        #label-title {top: 4px;}
+        #label-artist {bottom: 8px;}
 
         #right-section {
-            position: absolute;
             top: 0;
             bottom: 0;
             right: 0;
             width: 40px;
             
-            -webkit-app-region: no-drag;
             border-left: 1px solid rgb(180, 26, 85);
         }
 
-        .btn-close {
-            position: absolute;
+        #btn-close {
             right: 6px;
             top: 6px;
 
@@ -111,61 +88,61 @@
         }
 
         #label-volume-wrapper {
-            position: absolute;
             right: 8px;
             bottom: 4px;
         }
     </style>
-    <script>window.$ = window.jQuery = require('jquery');</script>
     <script>
-        const remote = require('electron').remote;
+        const
+        remote = require('electron').remote,
+        socket = new WebSocket("wss://listen.moe/api/v2/socket");
 
-        const socket = new WebSocket("wss://listen.moe/api/v2/socket");
         socket.onmessage = function(message) {
             let data = JSON.parse(message.data);
-            $('#label-title').html(data.song_name);
-            $('#label-artist').html(data.artist_name);
+            document.getElementById('label-title').innerHTML = data.song_name;
+            document.getElementById('label-artist').innerHTML = data.artist_name;
         }
 
         function mouseWheelHandler(e) {
-            let mediaPlayer = $("#audio-player")[0];
-            let delta = (e.wheelDelta / 24) / 100;
-
-            let amount = mediaPlayer.volume + delta;
+            let
+            mediaPlayer = document.getElementById("audio-player"),
+			amount = mediaPlayer.volume + (e.wheelDelta / 2400);
+            
             amount = Math.max(0, amount);
             amount = Math.min(1, amount);
             mediaPlayer.volume = amount;
 
             let rounded = Math.round(amount * 100);
-            $('#label-volume').html(rounded.toString() + '%');
+            document.getElementById("label-volume").innerHTML = rounded + '%';
         }
 
-        $(document).ready(function (e) {
-            $('#btn-pause-play').on('click', function () {
-                let btn = $($('#btn-pause-play')[0]);
-                let mediaPlayer = $("#audio-player")[0];
-                if (btn.hasClass("btn-pause")) {
+        document.addEventListener('DOMContentLoaded', function(){
+            document.getElementById('btn-pause-play').addEventListener('click', function () {
+                let
+                btn = document.getElementById('btn-pause-play'),
+                mediaPlayer = document.getElementById("audio-player");
+
+                if (btn.classList.contains("btn-pause")) {
                     //Pause it
                     mediaPlayer.pause();
 
-                    btn.removeClass("btn-pause");
-                    btn.addClass("btn-play");
+                    btn.classList.remove("btn-pause");
+                    btn.classList.add("btn-play");
                 } else {
                     //Play it
                     mediaPlayer.load();
                     mediaPlayer.play();
 
-                    btn.removeClass("btn-play");
-                    btn.addClass("btn-pause");
+                    btn.classList.remove("btn-play");
+                    btn.classList.add("btn-pause");
                 }
             });
 
-            $('.btn-close').on('click', function () {
-                let w = remote.getCurrentWindow();
-                w.close();
+            document.getElementById('btn-close').addEventListener('click', function () {
+                remote.getCurrentWindow().close();
             });
 
-            $('#right-section')[0].addEventListener("mousewheel", mouseWheelHandler, false);
+            document.getElementById('right-section').addEventListener("mousewheel", mouseWheelHandler, false);
         });
     </script>
 </head>
@@ -176,7 +153,7 @@
     <h1 id="label-title"></h1>
     <h2 id="label-artist"></h2>
     <div id="right-section">
-        <div class="btn-icon btn-close"></div>
+        <div class="btn-icon" id="btn-close"></div>
         <div id="label-volume-wrapper">
             <h2 id="label-volume">100%</h2>
         </div>
