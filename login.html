@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Listen.moe login</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        const {remote, BrowserWindow} = require('electron');
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById("login-submit").addEventListener('click', (e) => {
+                e.preventDefault();
+                let
+                form_username = document.getElementsByName('username')[0].value,
+                form_password = document.getElementsByName('password')[0].value;
+                fetch("https://listen.moe/api/authenticate",
+                    {
+                        headers: {
+                          'Accept': 'application/json',
+                          'Content-Type': 'application/json'
+                        },
+                        method: "POST",
+                        body: JSON.stringify({username: form_username, password: form_password})
+                    })
+                    .then((res) => { return res.json() })
+                    .then((res) => {
+                        console.log(res);
+                        if (res.success){
+                            window.token = res.token;
+                            res.username = form_username;
+                            remote.BrowserWindow.fromId(1).emit('authenticated', res);
+                            remote.getCurrentWindow().hide();
+                        } else {
+                            document.getElementById('error').innerHTML = res.message;
+                        }
+                    });
+            }, true);
+            document.getElementById("login-cancel").addEventListener('click', () => {
+                remote.getCurrentWindow().hide();
+            });
+        });
+    </script>
+</head>
+<body>
+    <form action="#" id="login-form" method="post">
+        <label for="username">Username</label>
+        <input type="text" name="username"/>
+
+        <label for="password">Password</label>
+        <input type="password" name="password"/>
+
+        <span id="error">&nbsp;</span>
+
+        <button id="login-submit">Login</button>
+        <button id="login-cancel">Cancel</button>
+    </form>
+</body>
+</html>
