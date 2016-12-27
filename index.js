@@ -41,14 +41,17 @@ app.on('ready', () => {
 	createWindow();
 	createLoginWindow();
 });
+
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin')
+    if (process.platform !== 'darwin') {
 	    app.quit();
+    }
 });
 
 app.on('activate', () => {
-    if (window === null)
+    if (window === null) {
         createWindow();
+    }
 });
 
 ipcMain.on('show-login', () => loginWindow.show());

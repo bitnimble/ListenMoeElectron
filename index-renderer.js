@@ -1,18 +1,34 @@
 const
 {remote, ipcRenderer} = require('electron'),
-Menu = remote.Menu;
-let socket;
+Menu = remote.Menu,
+currentWindow = remote.getCurrentWindow();
+let
+ls = window.localStorage, // for brevity
+socket;
+
+if ((Date.now() - ls.timestamp) > 2592000000) {
+    ls.clear();
+}
 
 /* Returns menu with items depending on whether a user is logged in */
 function buildMenu() {
     let menuTemplate = [];
-    if (typeof window.username !== 'undefined') {
-        menuTemplate.push({label: `Logged in as ${window.username}`, enabled: false});
-        menuTemplate.push({type: 'separator'});
+    if (typeof ls.username !== 'undefined') {
+        menuTemplate.push(
+            {label: `Logged in as ${ls.username}`, enabled: false}
+        );
     } else {
-        menuTemplate.push({label: "Login", click() {ipcRenderer.send('show-login')}});
+        menuTemplate.push(
+            {label: "Login", click() {ipcRenderer.send('show-login');}}
+        );
     }
-    menuTemplate.push({label: "Refresh", click() {socket.send("update")}});
+    menuTemplate.push({type: 'separator'});
+    menuTemplate.push({label: "Refresh", click() {socket.send("update");}});
+    menuTemplate.push({
+        label: "Always on top",
+        type: 'checkbox',
+        click() {currentWindow.setAlwaysOnTop(!currentWindow.isAlwaysOnTop());}
+    });
     return Menu.buildFromTemplate(menuTemplate);
 }
 
@@ -22,18 +38,30 @@ function initWebSocket() {
     socket = new WebSocket("wss://listen.moe/api/v2/socket");
     socket.onmessage = function(message) {
         let data = JSON.parse(message.data);
-        $('#label-title').html(data.song_name);
+        console.log(message);
+        if (message.data.length === 0) { return; }
+        window.songInfo = data;
+
+        document.getElementById('label-title').innerHTML = data.song_name;
         let artistAnimeName = data.artist_name;
         if (data.anime_name) {
-            if (data.artist_name)
-                artistAnimeName += " (" + data.anime_name + ")";
-            else
+            if (data.artist_name) {
+                artistAnimeName += ` (${data.anime_name})`;
+            } else {
                 artistAnimeName = data.anime_name;
+            }
         }
         //What is readability
         let middle = data.requested_by ? ((artistAnimeName.trim()) ? "; Requested by " : "Requested by ") : "";
 
-        $('#label-artist').html(artistAnimeName.trim() + middle + data.requested_by);
+        document.getElementById('label-artist').innerHTML = `${artistAnimeName.trim()}${middle}${data.requested_by}`;
+
+        let favoriteButton = document.getElementById('btn-favorite');
+        if (typeof data.extended !== 'undefined') {
+            favoriteButton.classList.toggle('in-favorites', data.extended.favorite);
+        } else {
+            favoriteButton.classList.toggle('in-favorites', false);
+        }
     };
 
     socket.onclose = function() {
@@ -43,20 +71,12 @@ function initWebSocket() {
 }
 initWebSocket();
 
-
-socket.onmessage = (message) => {
-    if (message.data.length === 0) return;
-    console.log(message);
-    let data = JSON.parse(message.data);
-    document.getElementById('label-title').innerHTML = data.song_name;
-    document.getElementById('label-artist').innerHTML = data.artist_name;
-}
-
-remote.getCurrentWindow().addListener('authenticated', (message) => {
+currentWindow.addListener('authenticated', (message) => {
     if (typeof message.token === 'undefined' ||
-        typeof message.username === 'undefined') return;
-    window.token = message.token;
-    window.username = message.username;
+        typeof message.username === 'undefined') { return; }
+    ls.token = message.token;
+    ls.timestamp = + new Date();
+    ls.username = message.username;
     menu = buildMenu();
     socket.send(JSON.stringify(message));
 });
@@ -64,8 +84,7 @@ remote.getCurrentWindow().addListener('authenticated', (message) => {
 /* For right-click menu */
 window.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-    console.log('contextmenu');
-    menu.popup(remote.getCurrentWindow());
+    menu.popup(currentWindow);
 }, false);
 
 function mouseWheelHandler (e) {
@@ -82,6 +101,11 @@ function mouseWheelHandler (e) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    let body = document.getElementsByTagName('body')[0];
+    if (typeof ls.token !== 'undefined' && !body.classList.contains('logged-in')) {
+        body.classList.add('logged-in');
+    }
+
     document.getElementById('btn-pause-play').addEventListener('click', () => {
         let
         btn = document.getElementById('btn-pause-play'),
@@ -103,10 +127,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-    document.getElementById('btn-close').addEventListener('click', () => {
-        remote.getCurrentWindow().close();
+    document.getElementById('btn-favorite').addEventListener('click', () => {
+        if (typeof ls.token === 'undefined') { return; }
+        let message = {song: window.songInfo.song_id, token: ls.token};
+        fetch('https://listen.moe/api/songs/favorite',
+        {
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: JSON.stringify(message)
+        })
+        .then((res) => { return res.json(); })
+        .then((res) => {
+            document.getElementById('btn-favorite').classList.toggle('in-favorites', res.favorite);
+        });
     });
 
-    document.getElementById('right-section').addEventListener("mousewheel", mouseWheelHandler, false);
+    document.getElementById('btn-close').addEventListener('click', () => {
+        currentWindow.close();
+    });
+
+    document.querySelector('.right-section')
+    .addEventListener("mousewheel", mouseWheelHandler, false);
 });

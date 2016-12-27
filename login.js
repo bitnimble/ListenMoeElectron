@@ -1,10 +1,12 @@
-const {remote, BrowserWindow} = require('electron');
+const {remote} = require('electron');
+
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("login-submit").addEventListener('click', (e) => {
         e.preventDefault();
         let
         form_username = document.getElementsByName('username')[0].value,
         form_password = document.getElementsByName('password')[0].value;
+
         fetch("https://listen.moe/api/authenticate",
             {
                 headers: {
@@ -12,7 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   'Content-Type': 'application/json'
                 },
                 method: "POST",
-                body: JSON.stringify({username: form_username, password: form_password})
+                body: JSON.stringify(
+                    {username: form_username, password: form_password}
+                )
             })
             .then((res) => { return res.json() })
             .then((res) => {
@@ -27,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
     }, true);
+
     document.getElementById("login-cancel").addEventListener('click', () => {
         remote.getCurrentWindow().hide();
     });

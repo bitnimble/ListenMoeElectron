@@ -25,8 +25,8 @@ body {
 
 /* index.html */
 #btn-pause-play-wrapper, #btn-pause-play, #label-title,
-#label-artist, #right-section, #btn-close,
-#label-volume-wrapper {
+#label-artist, .right-section, #btn-close,
+#label-volume-wrapper, #btn-favorite {
 	position: absolute;
 	-webkit-app-region: no-drag;
 }
@@ -53,8 +53,20 @@ body {
     transform: scale(1.05);
 }
 
+#btn-favorite {
+    display: none;
+    right: 50px;
+    top: 16px;
+
+    cursor: pointer;
+}
+
+body.logged-in #btn-favorite {display: block;}
+
 .btn-pause {background-image: url(pause.png);}
 .btn-play {background-image: url(play.png);}
+#btn-favorite {background-image: url(star-o.png);}
+#btn-favorite.in-favorites {background-image: url(star.png);}
 
 h1, h2 {
 	margin: 0;
@@ -84,7 +96,7 @@ h2 {font-size: 8pt;}
     top: 28px;
 }
 
-#right-section {
+.right-section {
     top: 0;
     bottom: 0;
     right: 0;
