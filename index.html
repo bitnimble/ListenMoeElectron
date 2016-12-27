@@ -127,7 +127,17 @@
 			socket.onmessage = function(message) {
 				let data = JSON.parse(message.data);
 				$('#label-title').html(data.song_name);
-				$('#label-artist').html(data.artist_name);
+				let artistAnimeName = data.artist_name;
+				if (data.anime_name) {
+					if (data.artist_name)
+						artistAnimeName += " (" + data.anime_name + ")";
+					else
+						artistAnimeName = data.anime_name;
+				}
+				//What is readability
+				let middle = data.requested_by ? ((artistAnimeName.trim()) ? "; Requested by " : "Requested by ") : "";
+				
+				$('#label-artist').html(artistAnimeName.trim() + middle + data.requested_by);
 			};
 
 			socket.onclose = function() {
