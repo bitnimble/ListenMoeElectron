@@ -120,12 +120,22 @@
     <script>
         const remote = require('electron').remote;
 
-        const socket = new WebSocket("wss://listen.moe/api/v2/socket");
-        socket.onmessage = function(message) {
-            let data = JSON.parse(message.data);
-            $('#label-title').html(data.song_name);
-            $('#label-artist').html(data.artist_name);
-        }
+        let socket;
+
+		function initWebSocket() {
+			socket = new WebSocket("wss://listen.moe/api/v2/socket");
+			socket.onmessage = function(message) {
+				let data = JSON.parse(message.data);
+				$('#label-title').html(data.song_name);
+				$('#label-artist').html(data.artist_name);
+			};
+			
+			socket.onclose = function() {
+				//Reconnect after 2 seconds if we dc
+				setTimeout(function() { initWebSocket(); }, 2000);
+			};
+		}
+		initWebSocket();
 
         function mouseWheelHandler(e) {
             let mediaPlayer = $("#audio-player")[0];
