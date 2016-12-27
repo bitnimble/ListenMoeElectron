@@ -1,7 +1,7 @@
 const
 {remote, ipcRenderer} = require('electron'),
-Menu = remote.Menu,
-socket = new WebSocket("wss://listen.moe/api/v2/socket");
+Menu = remote.Menu;
+let socket;
 
 /* Returns menu with items depending on whether a user is logged in */
 function buildMenu() {
@@ -17,6 +17,32 @@ function buildMenu() {
 }
 
 let menu = buildMenu();
+
+function initWebSocket() {
+    socket = new WebSocket("wss://listen.moe/api/v2/socket");
+    socket.onmessage = function(message) {
+        let data = JSON.parse(message.data);
+        $('#label-title').html(data.song_name);
+        let artistAnimeName = data.artist_name;
+        if (data.anime_name) {
+            if (data.artist_name)
+                artistAnimeName += " (" + data.anime_name + ")";
+            else
+                artistAnimeName = data.anime_name;
+        }
+        //What is readability
+        let middle = data.requested_by ? ((artistAnimeName.trim()) ? "; Requested by " : "Requested by ") : "";
+
+        $('#label-artist').html(artistAnimeName.trim() + middle + data.requested_by);
+    };
+
+    socket.onclose = function() {
+        //Reconnect after 2 seconds if we dc
+        setTimeout(function() { initWebSocket(); }, 2000);
+    };
+}
+initWebSocket();
+
 
 socket.onmessage = (message) => {
     if (message.data.length === 0) return;
@@ -76,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add("btn-pause");
         }
     });
+
 
     document.getElementById('btn-close').addEventListener('click', () => {
         remote.getCurrentWindow().close();

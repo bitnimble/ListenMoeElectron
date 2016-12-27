@@ -4,7 +4,6 @@
 }
 
 html {
-    background-color: rgb(236, 26, 85);
     font-family: 'Open Sans', sans-serif;
     color: white;
 }
@@ -15,6 +14,7 @@ body {
     height: 48px;
     padding: 0;
     margin: 0;
+    background-color: #2C2E3B;
 }
 
 .btn-icon {
@@ -35,14 +35,22 @@ body {
     left: 0;
     top: 0;
     bottom: 0;
-    width: 40px;
+    width: 48px;
+    height: 100%;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    background-color: #EC1A55;
 }
 
 #btn-pause-play {
-    left: 12px;
+    left: 16px;
     top: 16px;
 
     cursor: pointer;
+}
+
+#btn-pause-play:hover {
+    transform: scale(1.05);
 }
 
 .btn-pause {background-image: url(pause.png);}
@@ -61,14 +69,20 @@ h1 {font-size: 11pt;}
 h2 {font-size: 8pt;}
 
 #label-title, #label-artist {
-    left: 40px;
+    left: 55px;
     white-space: nowrap;
     overflow: hidden;
     max-width: 300px;
     text-overflow: ellipsis;
 }
-#label-title {top: 4px;}
-#label-artist {bottom: 8px;}
+
+#label-title {
+    top: 6px;
+}
+
+#label-artist {
+    top: 28px;
+}
 
 #right-section {
     top: 0;
@@ -76,7 +90,8 @@ h2 {font-size: 8pt;}
     right: 0;
     width: 40px;
 
-    border-left: 1px solid rgb(180, 26, 85);
+    border-left: 1px solid #1D1F2B;
+    background-color: #2C2E3B;
 }
 
 #btn-close {
