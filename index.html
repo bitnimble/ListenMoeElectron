@@ -3,211 +3,26 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title></title>
-    <style>
-        @font-face {
-            font-family: 'Open Sans';
-            src: url(OpenSans-Regular.ttf) format('truetype');
-        }
-
-        html {
-            font-family: 'Open Sans', sans-serif;
-            color: white;
-        }
-
-        body {
-            -webkit-app-region: drag;
-            width: 400px;
-            height: 48px;
-            padding: 0;
-            margin: 0;
-			background-color: #2C2E3B;
-        }
-
-        .btn-icon {
-            width: 16px;
-            height: 16px;
-            background-size: 16px 16px;
-        }
-
-        #btn-pause-play-wrapper {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 48px;
-			height: 100%;
-			
-			background-color: #EC1A55;
-            cursor: pointer;
-
-            -webkit-app-region: no-drag;
-        }
-
-        #btn-pause-play {
-            position: absolute;
-
-            left: 16px;
-            top: 16px;
-        }
-
-        .btn-pause {
-            background-image: url(pause.png);
-        }
-
-        .btn-play {
-            background-image: url(play.png);
-        }
-
-        /* h1 is used for the song title text */
-        h1 {
-            font-size: 11pt;
-            padding: 0;
-            margin: 0;
-            font-weight: lighter;
-        }
-
-        /* h2 is used for the artist and volume text */
-        h2 {
-            font-size: 8pt;
-            padding: 0;
-            margin: 0;
-            font-weight: lighter;
-        }
-
-        #label-title {
-            position: absolute;
-            left: 58px;
-            top: 6px;
-
-            -webkit-app-region: no-drag;
-        }
-
-        #label-artist {
-            position: absolute;
-            left: 58px;
-            bottom: 6px;
-            -webkit-app-region: no-drag;
-        }
-
-        #right-section {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            width: 40px;
-            
-            -webkit-app-region: no-drag;
-            border-left: 1px solid #1D1F2B;
-			background-color: #2C2E3B;
-        }
-
-        .btn-close {
-            position: absolute;
-            right: 6px;
-            top: 6px;
-
-            background-image: url(close.png);
-            cursor: pointer;
-        }
-
-        #label-volume-wrapper {
-            position: absolute;
-            right: 8px;
-            bottom: 4px;
-        }
-    </style>
-	<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <title>Listen.moe</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="index-renderer.js"></script>
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	<script>if (window.module) module = window.module;</script>
-    <script>
-        const remote = require('electron').remote;
-
-        let socket;
-
-		function initWebSocket() {
-			socket = new WebSocket("wss://listen.moe/api/v2/socket");
-			socket.onmessage = function(message) {
-				let data = JSON.parse(message.data);
-				$('#label-title').html(data.song_name);
-				let artistAnimeName = data.artist_name;
-				if (data.anime_name) {
-					if (data.artist_name)
-						artistAnimeName += " (" + data.anime_name + ")";
-					else
-						artistAnimeName = data.anime_name;
-				}
-				//What is readability
-				let middle = data.requested_by ? ((artistAnimeName.trim()) ? "; Requested by " : "Requested by ") : "";
-				
-				$('#label-artist').html(artistAnimeName.trim() + middle + data.requested_by);
-			};
-			
-			socket.onclose = function() {
-				//Reconnect after 2 seconds if we dc
-				setTimeout(function() { initWebSocket(); }, 2000);
-			};
-		}
-		initWebSocket();
-
-        function mouseWheelHandler(e) {
-            let mediaPlayer = $("#audio-player")[0];
-            let delta = (e.wheelDelta / 24) / 100;
-
-            let amount = mediaPlayer.volume + delta;
-            amount = Math.max(0, amount);
-            amount = Math.min(1, amount);
-            mediaPlayer.volume = amount;
-
-            let rounded = Math.round(amount * 100);
-            $('#label-volume').html(rounded.toString() + '%');
-        }
-
-        $(document).ready(function (e) {
-            $('#btn-pause-play-wrapper').on('click', function () {
-                let btn = $($('#btn-pause-play')[0]);
-                let mediaPlayer = $("#audio-player")[0];
-                if (btn.hasClass("btn-pause")) {
-                    //Pause it
-                    mediaPlayer.pause();
-
-                    btn.removeClass("btn-pause");
-                    btn.addClass("btn-play");
-                } else {
-                    //Play it
-                    mediaPlayer.load();
-                    mediaPlayer.play();
-
-                    btn.removeClass("btn-play");
-                    btn.addClass("btn-pause");
-                }
-            });
-			
-			$('#btn-pause-play-wrapper').hover(function() {
-                let btn = $($('#btn-pause-play')[0]);
-				btn.css("transform", "scale(1.05)");
-			}, function() {
-                let btn = $($('#btn-pause-play')[0]);
-				btn.css("transform", "scale(1)");
-			});
-
-            $('.btn-close').on('click', function () {
-                let w = remote.getCurrentWindow();
-                w.close();
-            });
-
-            $('#right-section')[0].addEventListener("mousewheel", mouseWheelHandler, false);
-        });
-    </script>
 </head>
 <body>
-    <div id="btn-pause-play-wrapper">
-        <div class="btn-icon btn-pause" id="btn-pause-play"></div>
+    <div class="left-section">
+        <div id="btn-pause-play-wrapper">
+            <div class="btn-icon btn-pause" id="btn-pause-play"></div>
+        </div>
+        <h1 id="label-title"></h1>
+        <h2 id="label-artist"></h2>
+        <div class="right">
+            <div id="btn-favorite" class="btn-icon"></div>
+        </div>
     </div>
-    <h1 id="label-title"></h1>
-    <h2 id="label-artist"></h2>
-    <div id="right-section">
-        <div class="btn-icon btn-close"></div>
+    <div class="right-section">
+        <div class="btn-icon" id="btn-close"></div>
         <div id="label-volume-wrapper">
             <h2 id="label-volume">100%</h2>
         </div>
