@@ -36,10 +36,12 @@
             top: 0;
             bottom: 0;
             width: 48px;
-
-            /*box-sizing: border-box;
-            border: 1px solid black;*/
+			height: 100%;
+			
 			background-color: #EC1A55;
+            cursor: pointer;
+
+            -webkit-app-region: no-drag;
         }
 
         #btn-pause-play {
@@ -47,9 +49,6 @@
 
             left: 16px;
             top: 16px;
-
-            cursor: pointer;
-            -webkit-app-region: no-drag;
         }
 
         .btn-pause {
@@ -118,7 +117,9 @@
             bottom: 4px;
         }
     </style>
-    <script>window.$ = window.jQuery = require('jquery');</script>
+	<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script>if (window.module) module = window.module;</script>
     <script>
         const remote = require('electron').remote;
 
@@ -163,7 +164,7 @@
         }
 
         $(document).ready(function (e) {
-            $('#btn-pause-play').on('click', function () {
+            $('#btn-pause-play-wrapper').on('click', function () {
                 let btn = $($('#btn-pause-play')[0]);
                 let mediaPlayer = $("#audio-player")[0];
                 if (btn.hasClass("btn-pause")) {
@@ -181,6 +182,14 @@
                     btn.addClass("btn-pause");
                 }
             });
+			
+			$('#btn-pause-play-wrapper').hover(function() {
+                let btn = $($('#btn-pause-play')[0]);
+				btn.css("transform", "scale(1.05)");
+			}, function() {
+                let btn = $($('#btn-pause-play')[0]);
+				btn.css("transform", "scale(1)");
+			});
 
             $('.btn-close').on('click', function () {
                 let w = remote.getCurrentWindow();
