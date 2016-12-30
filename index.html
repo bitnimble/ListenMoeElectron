@@ -10,6 +10,11 @@
             src: url(OpenSans-Regular.ttf) format('truetype');
         }
 
+        ::selection {
+            color: inherit;
+            background-color: rgba(236, 26, 85, 0.6);
+        }
+
         html {
             font-family: 'Open Sans', sans-serif;
             color: white;
@@ -98,6 +103,8 @@
             width: 40px;
             
             -webkit-app-region: no-drag;
+            -webkit-user-select: none;
+            cursor: default;
             border-left: 1px solid #1D1F2B;
 			background-color: #2C2E3B;
         }
