@@ -1,10 +1,8 @@
-const
-{remote, ipcRenderer} = require('electron'),
-Menu = remote.Menu,
-currentWindow = remote.getCurrentWindow();
-let
-ls = window.localStorage, // for brevity
-socket;
+const { remote, ipcRenderer } = require('electron');
+const Menu = remote.Menu;
+const currentWindow = remote.getCurrentWindow();
+let ls = window.localStorage; // for brevity
+let socket;
 
 if ((Date.now() - ls.timestamp) > 2592000000) {
     ls.clear();
@@ -14,20 +12,33 @@ if ((Date.now() - ls.timestamp) > 2592000000) {
 function buildMenu() {
     let menuTemplate = [];
     if (typeof ls.username !== 'undefined') {
-        menuTemplate.push(
-            {label: `Logged in as ${ls.username}`, enabled: false}
-        );
+        menuTemplate.push({
+            label: `Logged in as ${ls.username}`,
+            enabled: false
+        });
     } else {
-        menuTemplate.push(
-            {label: "Login", click() {ipcRenderer.send('show-login');}}
-        );
+        menuTemplate.push({
+            label: "Login",
+            click() {
+                ipcRenderer.send('show-login');
+            }
+        });
     }
-    menuTemplate.push({type: 'separator'});
-    menuTemplate.push({label: "Refresh", click() {socket.send("update");}});
+    menuTemplate.push({
+        type: 'separator'
+    });
+    menuTemplate.push({
+        label: "Refresh",
+        click() {
+            socket.send("update");
+        }
+    });
     menuTemplate.push({
         label: "Always on top",
         type: 'checkbox',
-        click() {currentWindow.setAlwaysOnTop(!currentWindow.isAlwaysOnTop());}
+        click() {
+            currentWindow.setAlwaysOnTop(!currentWindow.isAlwaysOnTop());
+        }
     });
     return Menu.buildFromTemplate(menuTemplate);
 }
@@ -39,7 +50,9 @@ function initWebSocket() {
     socket.onmessage = function(message) {
         let data = JSON.parse(message.data);
         console.log(message);
-        if (message.data.length === 0) { return; }
+        if (message.data.length === 0) {
+            return;
+        }
         window.songInfo = data;
 
         document.getElementById('label-title').innerHTML = data.song_name;
@@ -66,18 +79,26 @@ function initWebSocket() {
 
     socket.onclose = function() {
         //Reconnect after 2 seconds if we dc
-        setTimeout(function() { initWebSocket(); }, 2000);
+        setTimeout(function() {
+            initWebSocket();
+        }, 2000);
     };
 }
 initWebSocket();
 
 currentWindow.addListener('authenticated', (message) => {
     if (typeof message.token === 'undefined' ||
-        typeof message.username === 'undefined') { return; }
+        typeof message.username === 'undefined') {
+        return;
+    }
     ls.token = message.token;
-    ls.timestamp = + new Date();
+    ls.timestamp = +new Date();
     ls.username = message.username;
     menu = buildMenu();
+    let leftSection = document.querySelector(".left-section");
+    if (!leftSection.classList.contains('logged-in')) {
+        leftSection.classList.add('logged-in');
+    }
     socket.send(JSON.stringify(message));
 });
 
@@ -87,10 +108,9 @@ window.addEventListener('contextmenu', (e) => {
     menu.popup(currentWindow);
 }, false);
 
-function mouseWheelHandler (e) {
-    let
-    mediaPlayer = document.getElementById("audio-player"),
-    amount = mediaPlayer.volume + (e.wheelDelta / 2400);
+function mouseWheelHandler(e) {
+    let mediaPlayer = document.getElementById("audio-player");
+    let amount = mediaPlayer.volume + (e.wheelDelta / 2400);
 
     amount = Math.max(0, amount);
     amount = Math.min(1, amount);
@@ -107,9 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('btn-pause-play').addEventListener('click', () => {
-        let
-        btn = document.getElementById('btn-pause-play'),
-        mediaPlayer = document.getElementById("audio-player");
+        let btn = document.getElementById('btn-pause-play');
+        let mediaPlayer = document.getElementById("audio-player");
 
         if (btn.classList.contains("btn-pause")) {
             //Pause it
@@ -128,19 +147,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('btn-favorite').addEventListener('click', () => {
-        if (typeof ls.token === 'undefined') { return; }
-        let message = {song: window.songInfo.song_id, token: ls.token};
-        fetch('https://listen.moe/api/songs/favorite',
-        {
+        if (typeof ls.token === 'undefined') {
+            return;
+        }
+        let message = {
+            song: window.songInfo.song_id,
+            token: ls.token
+        };
+        fetch('https://listen.moe/api/songs/favorite', {
             headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             },
             method: "POST",
             body: JSON.stringify(message)
-        })
-        .then((res) => { return res.json(); })
-        .then((res) => {
+        }).then((res) => {
+            return res.json();
+        }).then((res) => {
             document.getElementById('btn-favorite').classList.toggle('in-favorites', res.favorite);
         });
     });
@@ -149,6 +172,5 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWindow.close();
     });
 
-    document.querySelector('.right-section')
-    .addEventListener("mousewheel", mouseWheelHandler, false);
+    document.querySelector('.right-section').addEventListener("mousewheel", mouseWheelHandler, false);
 });

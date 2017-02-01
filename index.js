@@ -1,5 +1,4 @@
-﻿const
-{app, BrowserWindow, ipcMain} = require('electron');
+﻿const {app, BrowserWindow, ipcMain} = require('electron');
 
 let window, loginWindow;
 
